@@ -2,6 +2,7 @@
 #include <vector>
 #include <list>
 #include <algorithm>
+#include <memory>
 
 using namespace std;
 
@@ -14,10 +15,9 @@ struct Node {
 int getGraph(int* A, int N, vector<int>& v) {
 	v.assign(N - 1, 0);
 
-	vector<Node*> graph(N, NULL);
-	for(int i = 0; i < N; ++i) {
-		graph[i] = new Node();
-	}
+	vector<unique_ptr<Node> > graph(N);
+
+	generate(graph.begin(), graph.end(), []() {return unique_ptr<Node>(new Node());});
 
 	int root = -1;
 	for(int i = 0; i < N; i++) {
@@ -41,7 +41,7 @@ int getGraph(int* A, int N, vector<int>& v) {
 		int curIdx = queue.front();	
 		queue.pop_front();
 
-		Node* curNode = graph[curIdx]; 
+		Node* curNode = graph[curIdx].get(); 
 		curNode->isVisited = true;
 		if (level != curNode->level) {
 			v[level] = distance;		
@@ -50,7 +50,7 @@ int getGraph(int* A, int N, vector<int>& v) {
 		}
 		for (int i = 0; i < curNode->adj.size(); i++) {
 			int adjIdx = curNode->adj[i];
-			Node* curAdj = graph[adjIdx];
+			Node* curAdj = graph[adjIdx].get();
 			if (curAdj->isVisited) {
 				continue;
 			} else {
