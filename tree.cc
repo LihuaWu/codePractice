@@ -1,74 +1,133 @@
-#include <iostream>
+#include <stdio.h>
+
 #include <vector>
-#include <list>
 #include <algorithm>
-#include <memory>
+#include <functional>
+#include <string>
 
 using namespace std;
 
 struct Node {
-	vector<int> adj;
-	bool isVisited;
-	int level;
+	Node* left;
+	Node* right;
+	int value;
+	Node(int x, Node* l = nullptr, Node* r = nullptr) 
+		: value(x), left(l), right(r) {} 
 };
 
-int getGraph(int* A, int N, vector<int>& v) {
-	v.assign(N - 1, 0);
-
-	vector<unique_ptr<Node> > graph(N);
-
-	generate(graph.begin(), graph.end(), []() {return unique_ptr<Node>(new Node());});
-
-	int root = -1;
-	for(int i = 0; i < N; i++) {
-		graph[i]->adj.push_back(A[i]);
-		graph[A[i]]->adj.push_back(i);
-		if (A[i] == i) {
-			root = i;
-		}
-	}
-	if (root == -1) {
-		return -1;
-	}
-
-	list<int> queue;
-	int level = 0;
-	graph[root]->level = 0;
-	queue.push_back(root);
-	int distance = 0;
-
-	while(queue.size() > 0) {
-		int curIdx = queue.front();	
-		queue.pop_front();
-
-		Node* curNode = graph[curIdx].get(); 
-		curNode->isVisited = true;
-		if (level != curNode->level) {
-			v[level] = distance;		
-			distance = 0;
-			level = curNode->level;
-		}
-		for (int i = 0; i < curNode->adj.size(); i++) {
-			int adjIdx = curNode->adj[i];
-			Node* curAdj = graph[adjIdx].get();
-			if (curAdj->isVisited) {
-				continue;
-			} else {
-				distance += 1;
-				curAdj->level = level + 1;
-				queue.push_back(adjIdx);
-			}
-		}
-	}
-	return 0;
-}
-
 int main() {
-	int A[] = {9, 1, 4, 9, 0, 4, 8, 9, 0, 1};
-	vector<int> v;
-	getGraph(A, sizeof(A)/sizeof(int), v);
-	copy(v.begin(), v.end(), ostream_iterator<int>(cout, " "));
-	cout<<endl;
+
+	function<Node*(int*, int, int*)> ConstructTree = [&ConstructTree](int* preOrder, int m, int* inOrder) -> Node* {
+		if (m < 1) return nullptr;
+		 int root= preOrder[0];
+		int * p =  find(inOrder, inOrder + m, root);
+		Node*  cur = new Node(root);
+		//distance should be greater or equal to zero, or the tree failed
+		int distance = p - inOrder;
+
+		cur->left = ConstructTree(preOrder + 1, distance,  inOrder);
+		cur->right = ConstructTree(preOrder + distance + 1, m - distance - 1, inOrder + distance + 1);
+		return cur;
+	};
+
+	function<void(Node*, string&, bool)> InnerPrintTreePreorder = [&InnerPrintTreePreorder](Node* root, string& padding, bool isLeft) {
+
+		if(isLeft) {
+			printf("%s|-- %d\n", padding.c_str(), root->value);
+		} else {
+			printf("%s`-- %d\n", padding.c_str(), root->value);
+		}
+
+		string tmp = padding;
+
+		if(root->left != nullptr) {
+			//padding = "****" + padding;
+			if(isLeft) {
+				padding.append("|   ");
+			} else {
+				padding.append("    ");
+
+			}
+			InnerPrintTreePreorder(root->left, padding, true);
+			padding = tmp;
+		}
+		if(root->right != nullptr) {
+			//padding = "----" + padding;
+			if(isLeft) {
+				padding.append("|   ");
+			} else {
+				padding.append("    ");
+			}
+			InnerPrintTreePreorder(root->right, padding, false);
+			padding = tmp;
+		}
+		
+	};
+
+	auto PrintTreePreorder = [&InnerPrintTreePreorder](Node* root) {
+		printf("%d\n", root->value);
+		string padding("");
+		if(root->left != nullptr) {
+			InnerPrintTreePreorder(root->left, padding, true);
+		}
+		if(root->right != nullptr) {
+			InnerPrintTreePreorder(root->right, padding, false);
+		}
+		printf("-------------------------\n");
+	};
+
+	function<void(Node*, string&, bool)> InnerPrintTreeInorder = [&InnerPrintTreeInorder](Node* root, string& padding, bool isLeft) {
+		string tmp(padding);
+
+		if(root->left != nullptr) {
+			if(isLeft){
+				padding = "    " + padding;
+			}else {
+				padding = "|   " + padding;
+			}
+			InnerPrintTreeInorder(root->left, padding, true);
+			padding = tmp;
+		}
+
+
+		if(isLeft) {
+			printf("%s|-- %d\n", padding.c_str(), root->value);
+		} else {
+			printf("%s`-- %d\n", padding.c_str(), root->value);
+		}
+
+		if(root->right != nullptr) {
+			if(isLeft) {
+				padding = "|   " + padding;
+			} else {
+				padding = "    " + padding;
+			}
+
+			InnerPrintTreeInorder(root->right, padding, false);
+			padding = tmp;
+		}
+	};
+
+	auto PrintTreeInOrder = [&InnerPrintTreeInorder] (Node* root) {
+		string padding("");
+		if(root->left != nullptr) {
+			InnerPrintTreeInorder(root->left, padding, true);
+		}
+		printf("%d\n", root->value);
+		if(root->right != nullptr) {
+			InnerPrintTreeInorder(root->right, padding, false);
+		}
+		printf("-------------------------\n");
+
+	};
+
+
+	int preOrder[] = {1,2,4,5,3,6,7};
+	int inOrder[] = {4,2,5,1,6,3,7};
+	PrintTreePreorder(ConstructTree(preOrder, sizeof(preOrder)/sizeof(int), inOrder));
+	PrintTreeInOrder(ConstructTree(preOrder, sizeof(preOrder)/sizeof(int), inOrder));
+
+
 
 	return 0;
 }
