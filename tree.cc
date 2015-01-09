@@ -4,6 +4,9 @@
 #include <algorithm>
 #include <functional>
 #include <string>
+#include <queue>
+#include <memory>
+#include <utility>
 
 using namespace std;
 
@@ -41,7 +44,6 @@ int main() {
 		string tmp = padding;
 
 		if(root->left != nullptr) {
-			//padding = "****" + padding;
 			if(isLeft) {
 				padding.append("|   ");
 			} else {
@@ -52,7 +54,6 @@ int main() {
 			padding = tmp;
 		}
 		if(root->right != nullptr) {
-			//padding = "----" + padding;
 			if(isLeft) {
 				padding.append("|   ");
 			} else {
@@ -81,9 +82,11 @@ int main() {
 
 		if(root->left != nullptr) {
 			if(isLeft){
-				padding = "    " + padding;
+				padding.append("    ");
+				//padding = "    " + padding;
 			}else {
-				padding = "|   " + padding;
+				padding.append("|   ");
+				//padding = "|   " + padding;
 			}
 			InnerPrintTreeInorder(root->left, padding, true);
 			padding = tmp;
@@ -98,9 +101,11 @@ int main() {
 
 		if(root->right != nullptr) {
 			if(isLeft) {
-				padding = "|   " + padding;
+				padding.append("|   ");
+				//padding = "|   " + padding;
 			} else {
-				padding = "    " + padding;
+				padding.append("    ");
+				//padding = "    " + padding;
 			}
 
 			InnerPrintTreeInorder(root->right, padding, false);
@@ -121,12 +126,69 @@ int main() {
 
 	};
 
+	function<void(Node*, string&, bool)> InnerPrintTreePostOrder = [&InnerPrintTreePostOrder] (Node* root, string& padding, bool isLeft) {
+		string tmp(padding);
+		if(root->left != nullptr) {
+			if(isLeft) {
+				padding.append("    ");
+			} else {
+				padding.append("|   ");
+			}
+			InnerPrintTreePostOrder(root->left, padding, true);
+			padding = tmp;
+		}
 
-	int preOrder[] = {1,2,4,5,3,6,7};
-	int inOrder[] = {4,2,5,1,6,3,7};
-	PrintTreePreorder(ConstructTree(preOrder, sizeof(preOrder)/sizeof(int), inOrder));
-	PrintTreeInOrder(ConstructTree(preOrder, sizeof(preOrder)/sizeof(int), inOrder));
+		if (root->right != nullptr) {
+			if(isLeft) {
+				padding.append("    ");
+			} else {
+				padding.append("|   ");
+			}
+			InnerPrintTreePostOrder(root->right, padding, false);
+			padding = tmp;
+		}
 
+		printf("%s|-- %d\n", padding.c_str(), root->value);
+	};
+
+	auto PrintTreePostOrder = [&InnerPrintTreePostOrder] (Node* root) {
+		string padding("");
+		if(root->left != nullptr) {
+			InnerPrintTreePostOrder(root->left, padding, true);
+		}
+		if(root->right != nullptr) {
+			InnerPrintTreePostOrder(root->right, padding, false);
+		}
+		printf("%d\n", root->value);
+		printf("-------------------------\n");
+	};
+
+
+	auto RandomTree = [](int num) ->Node* {
+		Node* root = new Node(0);
+		queue<Node*> q;
+		q.push(root);
+		for(int i = 1; i < num; ) {
+			Node* cur = q.front();
+			q.pop();
+			cur->left = new Node(i++);
+			cur->right = new Node(i++);
+			q.push(cur->left);
+			q.push(cur->right);
+		}
+		return root;
+	};
+
+
+	//int preOrder[] = {1,2,4,5,3,6,7};
+	//int inOrder[] = {4,2,5,1,6,3,7};
+	//PrintTreePreorder(ConstructTree(preOrder, sizeof(preOrder)/sizeof(int), inOrder));
+	//PrintTreeInOrder(ConstructTree(preOrder, sizeof(preOrder)/sizeof(int), inOrder));
+
+	Node* root = RandomTree(50);
+	PrintTreePreorder(root);
+	PrintTreeInOrder(root);
+	PrintTreePostOrder(root);
 
 
 	return 0;
