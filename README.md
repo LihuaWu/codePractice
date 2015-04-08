@@ -1,5 +1,5 @@
 leetcode
 =========
 
-|# |title | solution|
-
+| # |title | solution|
+|:-----:|:-----:|:-----:|
