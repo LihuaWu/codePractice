@@ -19,7 +19,8 @@ CPPFLAGS('-D_GNU_SOURCE -D__STDC_LIMIT_MACROS -DVERSION=\\\"1.9.8.7\\\"')
 CFLAGS('-g -pipe -W -Wall -fPIC')
 
 #C++编译参数.
-CXXFLAGS('-g -pipe -W -Wall -fPIC')
+CXX("/home/work/.jumbo/opt/gcc49/bin/g++")
+CXXFLAGS('-g -pipe -std=c++11 -W -Wall -fPIC')
 
 #IDL编译参数
 IDLFLAGS('--compack')

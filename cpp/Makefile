@@ -2,9 +2,10 @@
 ####################64Bit Mode####################
 ifeq ($(shell uname -m),x86_64)
 CC=gcc
-CXX=g++
+CXX=/home/work/.jumbo/opt/gcc49/bin/g++
 CXXFLAGS=-g \
   -pipe \
+  -std=c++11 \
   -W \
   -Wall \
   -fPIC
@@ -35,7 +36,7 @@ CCP_FLAGS=
 
 
 #COMAKE UUID
-COMAKE_MD5=65ed6e4c8cf84819a4c82d22e6faeca9  COMAKE
+COMAKE_MD5=da17d0f4d0ea208076a9d1c13fa5ea16  COMAKE
 
 
 .PHONY:all
