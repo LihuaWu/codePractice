@@ -6,6 +6,7 @@ import "time"
 import "fmt"
 import "os"
 import "strconv"
+//import  "log"
 
 func check(t *testing.T, ck *Clerk, p string, b string, n uint) {
 	view, _ := ck.Get()
@@ -50,10 +51,11 @@ func Test1(t *testing.T) {
 	}
 
 	// very first primary
-	fmt.Printf("Test: First primary ...\n")
+	fmt.Printf("Test: First primary %d ...\n", DeadPings)
 
 	for i := 0; i < DeadPings*2; i++ {
 		view, _ := ck1.Ping(0)
+
 		if view.Primary == ck1.me {
 			break
 		}
@@ -70,6 +72,7 @@ func Test1(t *testing.T) {
 		for i := 0; i < DeadPings*2; i++ {
 			ck1.Ping(1)
 			view, _ := ck2.Ping(0)
+			fmt.Printf("****%s-- %s\n", view.Backup, ck2.me)
 			if view.Backup == ck2.me {
 				break
 			}
@@ -101,6 +104,7 @@ func Test1(t *testing.T) {
 
 	{
 		vx, _ := ck2.Get()
+		fmt.Printf("%e\n", vx)
 		ck2.Ping(vx.Viewnum)
 		for i := 0; i < DeadPings*2; i++ {
 			ck1.Ping(0)
@@ -156,6 +160,7 @@ func Test1(t *testing.T) {
 		if vy.Primary != ck3.me {
 			t.Fatalf("expected primary=%v, got %v\n", ck3.me, vy.Primary)
 		}
+		fmt.Printf("%e\n", vy)
 	}
 	fmt.Printf("  ... Passed\n")
 
@@ -170,6 +175,7 @@ func Test1(t *testing.T) {
 			time.Sleep(PingInterval)
 		}
 		v, _ := ck3.Get()
+		fmt.Printf("%e\n", v)
 		if v.Primary != ck3.me || v.Backup != "" {
 			t.Fatalf("wrong primary or backup")
 		}
