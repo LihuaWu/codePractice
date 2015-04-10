@@ -157,4 +157,6 @@ func main() {
 
   reply := tc.Call(22, 100)
   fmt.Printf("Call(22, 100) -> %v\n", reply)
+  reply = tc.Call(22, 122)
+  fmt.Printf("Call(22, 122) -> %v\n", reply)
 }
