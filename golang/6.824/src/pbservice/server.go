@@ -22,21 +22,95 @@ type PBServer struct {
 	me         string
 	vs         *viewservice.Clerk
 	// Your declarations here.
+	data	   map[string]string
+	replies		map[int64]string
+	curr	   viewservice.View
+}
+
+func (pb *PBServer) get(args *GetArgs, reply *GetReply) {
+	if _, ok := pb.data[args.Key]; !ok {
+		reply.Err = ErrNoKey
+		return
+	}
+	reply.Err = OK
+	reply.Value = pb.data[args.Key]
+}
+
+func (pb *PBServer) BGet(args *GetArgs, reply *GetReply) error {
+//	pb.mu.Lock()
+//	defer pb.mu.Unlock()
+	if pb.me != pb.curr.Backup {
+		reply.Err = ErrWrongServer
+		return nil
+	}
+	pb.get(args, reply)
+	pb.replies[args.Xid] = reply.Value
+	return nil
 }
 
 
 func (pb *PBServer) Get(args *GetArgs, reply *GetReply) error {
+//	pb.mu.Lock()
+//	defer pb.mu.Unlock()
+	
+	if r, ok := pb.replies[args.Xid]; ok {
+		reply.Err = OK
+		reply.Value = r
+		return nil
+	}
 
+	if pb.me != pb.curr.Primary {
+		reply.Err = ErrWrongServer
+		return nil
+	}
+
+	if pb.curr.Backup != "" {
+		if ok := call(pb.curr.Backup, "PBServer.BGet", args, reply); !ok {
+		}
+		if reply.Err != OK {
+			return nil
+		}
+	}
+
+	pb.get(args, reply)
+
+	pb.replies[args.Xid] = reply.Value
 	// Your code here.
 
 	return nil
 }
 
+func (pb *PBServer) BPut(args *PutAppendArgs, reply *PutAppendReply) error {
+	pb.mu.Lock()
+	defer pb.mu.Unlock()
+
+	if pb.me != pb.curr.Backup {
+		reply.Err = ErrWrongServer
+		return nil
+	}
+	pb.replies[args.Xid] = args.Value
+}
 
 func (pb *PBServer) PutAppend(args *PutAppendArgs, reply *PutAppendReply) error {
-
 	// Your code here.
+	pb.mu.Lock()
+	defer pb.mu.Unlock()
 
+	if pb.me != pb.curr.Primary {
+		reply.Err = ErrWrongServer
+		return nil
+	}
+
+	if pb.curr.Backup != "" {
+		if ok := call(pb.curr.Backup, "PBServer.BPut", args, reply); !ok {
+			return log.Printf("Put [%s]: Error talking to backup [%s]", pb.curr.Primary, pb.curr.Backup)
+		}
+		if reply.Err != OK {
+			return nil
+		}
+	}
+
+	pb.put(args, reply)
 
 	return nil
 }
@@ -49,7 +123,22 @@ func (pb *PBServer) PutAppend(args *PutAppendArgs, reply *PutAppendReply) error 
 //   manage transfer of state from primary to new backup.
 //
 func (pb *PBServer) tick() {
+	pb.mu.Lock()
+	defer pb.mu.Unlock()
 
+	view, err := pb.vs.Ping(pb.curr.Viewnum)
+	if err != nil {
+		return
+	}
+
+	if view.Primary == pb.me && view.Backup != "" && view.Backup != pb.curr.Backup {
+		var reply SyncReply
+		if ok := call(view.Backup, "PBServer.BSync", SyncArgs{pb.data, pb.replies}, &reply); !ok {
+			log.Printf("Sync[%s]: Error talking to backup [%s]", view.Primary,view.Backup)
+			return
+		}
+	}
+	pb.curr = view
 	// Your code here.
 }
 
@@ -75,6 +164,15 @@ func (pb *PBServer) setunreliable(what bool) {
 
 func (pb *PBServer) isunreliable() bool {
 	return atomic.LoadInt32(&pb.unreliable) != 0
+}
+
+func (pb *PBServer) BSync(args *SyncArgs, reply *SyncReply) error {
+	pb.mu.Lock()
+	defer pb.mu.Unlock()
+
+	pb.data = args.Data
+	pb.replies = args.Replies
+	return nil
 }
 
 

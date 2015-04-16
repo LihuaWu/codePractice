@@ -6,6 +6,7 @@ import "fmt"
 
 import "crypto/rand"
 import "math/big"
+import "time"
 
 
 type Clerk struct {
@@ -72,16 +73,66 @@ func call(srv string, rpcname string,
 // says the key doesn't exist (has never been Put().
 //
 func (ck *Clerk) Get(key string) string {
-
 	// Your code here.
+	p := ck.vs.Primary()
+	xid := nrand()
+	for {
+		for p == "" {
+			time.Sleep(viewservice.PingInterval)
+			p = ck.vs.Primary()
+		}
 
-	return "???"
+		args := &GetArgs{xid, key}
+		var reply GetReply
+		
+		for i := 0; i < viewservice.DeadPings; i++ {
+			if ok := call(p, "PBServer.Get", args, &reply); ok {
+				break
+			}
+			time.Sleep(viewservice.PingInterval)
+		}
+
+		if reply.Err == "" || reply.Err == ErrWrongServer {
+			p = ""
+			continue
+		}
+		if reply.Err == ErrNoKey {
+			return ""
+		}
+		return reply.Value
+	}
 }
 
 //
 // send a Put or Append RPC
 //
 func (ck *Clerk) PutAppend(key string, value string, op string) {
+	p := ck.vs.Primary()
+	xid := nrand()
+
+	for {
+		for p == "" {
+			time.Sleep(viewservice.PingInterval)
+			p = ck.vs.Primary()
+		}
+
+		args := &PutAppendArgs {xid, key, value, op}
+
+		var reply PutAppendReply
+
+		for i := 0; i < viewservice.DeadPings; i++ {
+			if ok := call(p, "PBServer.PutAppend", args, &reply); ok {
+				break;
+			}
+			time.Sleep(viewservice.PingInterval)
+		}
+
+		if reply.Err == "" || reply.Err = ErrWrongServer {
+			p = ""
+			continue
+		}
+		return reply.PreviousValue
+	}
 
 	// Your code here.
 }
