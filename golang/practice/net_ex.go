@@ -44,7 +44,59 @@ func echoFunc(c net.Conn) {
 	}
 }
 
-func main() {
-	log.Printf("%d %s\n", a, b)
+func types() {
+		a, b := 1, "hello"
 //	work()
+	log.Println(a, b)
+	const (
+		c = iota
+		d string = "hello"
+		e = iota
+		f = 1
+		g = iota + 6
+	)
+	log.Println(c, d, e, f, g)
+	var h complex64 = 5 + 5i;
+	log.Printf("value is %v", h)
+
+	list := []string {"a", "b", "c"}
+	for k, v := range list {
+		log.Println(k, "-", v)
+	}
+
+	slice := make([]string, len(list) - 1)
+	copy(slice, list[1:])
+
+	slice[1] = "d"
+	for k, v := range list {
+		log.Println(k, "-", v)
+	}
+	s2 := append(list, "e")
+	s2[2] = "ggg"
+	for k, v := range s2 {
+		log.Println(k, "-", v)
+	}
+	for k, v := range list {
+		log.Println(k, "-", v)
+	}
+
+}
+
+func Questions() {
+	for i := 0; i < 10; i++ {
+		log.Printf("%d ", i + 1)
+	}
+	log.Println()
+
+	sum := 0
+	for i := 0; i < 10; i ++ {
+		sum += i
+	}
+	sum /= 10
+	println(sum)
+
+}
+
+func main() {
+	Questions()
 }
