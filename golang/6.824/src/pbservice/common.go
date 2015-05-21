@@ -10,8 +10,10 @@ type Err string
 
 // Put or Append
 type PutAppendArgs struct {
+	Xid   int64		 
 	Key   string
 	Value string
+	Op	  string
 	// You'll have to add definitions here.
 
 	// Field names must start with capital letters,
@@ -23,6 +25,7 @@ type PutAppendReply struct {
 }
 
 type GetArgs struct {
+	Xid	int64
 	Key string
 	// You'll have to add definitions here.
 }
@@ -32,5 +35,11 @@ type GetReply struct {
 	Value string
 }
 
+type SyncArgs struct {
+	Data map[string]string
+	Replies map[int64]string
+}
+
+type SyncReply struct {}
 
 // Your RPC definitions here.

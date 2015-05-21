@@ -62,7 +62,6 @@ func (vs *ViewServer) Ping(args *PingArgs, reply *PingReply) error {
 	defer vs.mu.Unlock()
 
 	id, viewnum := args.Me, args.Viewnum
-//	fmt.Printf("server: %s view: %d,veview: %e\n", id, viewnum, vs.view)
 	switch id {
 	case vs.view.Primary:
 		if viewnum == vs.view.Viewnum {
