@@ -1,0 +1,8 @@
+#LIBRARY
+
+include_list=[".", "..", "/opt/local/include"]
+libpath_list=["/opt/local/lib"]
+
+Library("muyu", Split("CountDownLatch.cc  Exception.cc Thread.cc ThreadPool.cc Timestamp.cc"), LIBS=["pthread", "boost_thread-mt"], LIBPATH=libpath_list, CPPPATH=include_list)
+
+SConscript(['test/SConstruct'])

@@ -1,0 +1,26 @@
+#Atomic_test
+include_list=[".", "..", "/opt/local/include"]
+Program("Atomic_test", ["Atomic_test.cc"], CPPPATH=include_list)
+
+#Exception_test
+Program("Exception_test", ["Exception_test.cc"], LIBS=["muyu"], LIBPATH="..", CPPPATH=include_list)
+
+#Timestamp test
+Program("Timestamp_test", ["Timestamp_test.cc"], LIBS=["muyu"], LIBPATH="..", CPPPATH=include_list)
+
+#Mutex test
+Program("Mutex_test", "Mutex_test.cc",  LIBS=["muyu", "boost_thread-mt", "pthread", "boost_system-mt"], LIBPATH= ["/opt/local/lib", ".."], CPPPATH=include_list) 
+
+#SmartPtr_test.cc
+Program("SmartPtr_test", "SmartPtr_test.cc", CPPPATH=include_list)
+
+#Thread_test
+Program("Thread_test", "Thread_test.cc", LIBS=["muyu"], LIBPATH=[".."], CPPPATH=include_list)
+
+#BlockingQueue_test
+Program("BlockingQueue_test", "testBlockingQueue.cc", LIBS=["muyu", "boost_thread-mt", "boost_system-mt"], LIBPATH=["..", "/opt/local/lib"], CPPPATH=include_list)
+#testBlockingQueue_bench
+#Program("BlockingQueue_bench", "testBlockingQueue_bench.cc", LIBS=["muyu", "boost_thread-mt", "boost_system-mt"], LIBPATH=["..", "/opt/local/lib"], CPPPATH=include_list)
+
+
+
