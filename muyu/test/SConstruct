@@ -22,5 +22,6 @@ Program("BlockingQueue_test", "testBlockingQueue.cc", LIBS=["muyu", "boost_threa
 #testBlockingQueue_bench
 #Program("BlockingQueue_bench", "testBlockingQueue_bench.cc", LIBS=["muyu", "boost_thread-mt", "boost_system-mt"], LIBPATH=["..", "/opt/local/lib"], CPPPATH=include_list)
 
-
+#BoundedBlockingQueue_test
+Program("BoundedBlockingQueue_test", "BoundedBlockingQueue_test.cc", LIBS=["muyu"], LIBPATH=["..", "/opt/local/lib"], CPPPATH=include_list) 
 

@@ -3,6 +3,7 @@
 #include "Timestamp.h"
 
 #include <sys/syscall.h>
+#include <unistd.h>
 #include <sys/types.h>
 
 //#include <sys/prctl.h>
@@ -31,7 +32,8 @@ namespace CurrentThread {
 namespace detail {
 
 pid_t gettid() {
-	return static_cast<pid_t>(::syscall(SYS_gettid));
+//	return static_cast<pid_t>(::syscall(SYS_gettid));
+	return pthread_mach_thread_np(pthread_self());
 }
 
 struct ThreadData {
