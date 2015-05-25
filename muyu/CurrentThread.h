@@ -32,7 +32,5 @@ namespace CurrentThread {
 	void sleepUsec(int64_t usec);
 
 } //namespace CurrentThread
-
 } //namespace Sync
-
 #endif
